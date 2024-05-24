@@ -12,6 +12,10 @@
         "vite": "^5.0.0"
     },
     "dependencies": {
+        "autoprefixer": "^10.4.19",
+        "postcss": "^8.4.38",
+        "tailwindcss": "^3.4.3",
+        "vite-plugin-static-copy": "^1.0.5",
         "vue": "^3.4.27",
         "vue-loader": "^17.4.2",
         "vue-router": "^4.3.2"
