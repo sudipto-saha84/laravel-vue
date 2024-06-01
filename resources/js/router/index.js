@@ -21,6 +21,12 @@ const router = createRouter({
             component:()=>import('../components/mainMenu.vue'),
             // meta: { layout: mainLayout }
         },
+        {
+            path:'/test',
+            name:'test',
+            component:()=>import('../components/AudioTest.vue'),
+            // meta: { layout: mainLayout }
+        },
 
     ]
 })

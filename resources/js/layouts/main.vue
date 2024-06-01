@@ -5,7 +5,7 @@
 
         <slot/>
 
-    <clientFooter />
+    <clientFooter :autoplay="true" :audioSource="audioSource"/>
 
     </div>
 
@@ -18,6 +18,16 @@ import clientFooter from '../views/includes/footer.vue'
 export default {
     components: {
         clientHead, clientHeader,clientFooter
+    },
+    props: {
+        audioSource: {
+            type: String,
+            required: true
+        },
+        showControls: {
+            type: Boolean,
+            default: true
+        }
     },
     mounted() {
         console.log('layout called')

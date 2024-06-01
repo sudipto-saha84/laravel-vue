@@ -22,7 +22,7 @@
                     </div>
                 </a>
 
-                <a href="#">
+                <a href="#"@click.prevent="goBack">
                     <div class="flex items-center justify-center size-14">
                         <svg class="size-6" viewBox="0 0 15 27" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M13.5 2L2 13.5L13.5 25" stroke="white" stroke-width="2.5" stroke-linecap="round" />
@@ -30,7 +30,7 @@
                     </div>
                 </a>
 
-                <a href="#">
+                <a href="#" v-if="showControls" @click.prevent="togglePlayback">
                     <div class="flex items-center justify-center size-14">
                         <svg class="size-6" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -70,9 +70,83 @@
         </div>
     </footer>
 
+
 </template>
 <script>
+import {Howl} from 'howler'
 export default {
-    name :'clientFooter'
+    name :'clientFooter',
+    props: {
+        audioSource: {
+            type: String,
+            required: true
+        },
+        showControls: {
+            type: Boolean,
+            default: true
+        }
+    },
+    data() {
+        return {
+            isPlaying: false,
+            autoplay: true,
+            sound: null
+        };
+    },
+    methods: {
+        togglePlayback() {
+            if (this.isPlaying) {
+                this.sound.pause();
+            } else {
+                this.sound.play();
+            }
+            this.isPlaying = !this.isPlaying;
+        },
+        onAudioLoaded() {
+            if (this.autoplayRequested && !this.isPlaying) {
+                this.sound.play();
+                this.isPlaying = true;
+            }
+        },
+        goBack()
+        {
+            console.log('back clicked')
+           console.log('hisotory length',window.history.length)
+        }
+    },
+    mounted() {
+        // Detect if autoplay is allowed by the browser
+        const audio = new Audio();
+        audio.src = ''; // Create a dummy audio element
+        audio.autoplay = true; // Attempt autoplay
+        audio.play().then(() => {
+            // Autoplay succeeded
+            this.autoplay = true;
+        }).catch(() => {
+            // Autoplay failed, update UI accordingly
+            this.autoplay = false;
+        }).finally(() => {
+            // Clean up dummy audio element
+            audio.remove();
+        });
+
+        // Initialize Howler.js
+        this.sound = new Howl({
+            src: [this.audioSource],
+            autoplay: false,
+            onplay: () => {
+                this.isPlaying = true;
+            },
+            onpause: () => {
+                this.isPlaying = false;
+            }
+        });
+    },
+    beforeDestroy() {
+        // Cleanup audio when component is destroyed
+        if (this.sound) {
+            this.sound.unload(); // Unload Howler.js sound instance
+        }
+    },
 }
 </script>
