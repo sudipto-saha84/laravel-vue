@@ -1,5 +1,5 @@
 <template>
-    <mainLayout audioSource="./prompts/audio.mp3">
+    <mainLayout>
 
         <div class="fixed top-0 w-screen h-screen flex-row justify-start z-[2147483647]" id="mobileMenu"
              :style="menuShow?'display: flex;':'display: none'">
@@ -315,13 +315,14 @@
             </svg>
         </button>
         <!-- Headphone -->
-
+        <clientFooter :autoplay="true" :audioSource="audio"/>
     </mainLayout>
 </template>
 
 <script>
 import mainLayout from "@/layouts/main.vue";
 import '../script.js'
+import clientFooter from "@/views/includes/footer.vue";
 
 export default {
     name: 'App',
@@ -335,10 +336,12 @@ export default {
             mobileMenuDetails: {},
             names:{},
             svgs:{},
-            subMenu:''
+            subMenu:'',
+            audio:'./prompts/audio.mp3'
         }
     },
     components: {
+        clientFooter,
      mainLayout
     },
     mounted() {
@@ -375,7 +378,8 @@ export default {
         async init()
         {
             await this.getMenu().then(response => {
-                this.dataDetails = response.data
+                this.dataDetails = response.data.elements
+                this.audio = response.data.audio
             })
         },
         getMenuDetails(name)

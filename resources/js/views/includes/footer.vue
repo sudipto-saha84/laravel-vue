@@ -43,7 +43,7 @@
                     </div>
                 </a>
 
-                <a href="#">
+                <a href="" @click.prevent="togglePlayback">
                     <div class="flex items-center justify-center size-14">
                         <svg class="size-6" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -53,7 +53,7 @@
                     </div>
                 </a>
 
-                <a href="#">
+                <a href="">
                     <div class="flex items-center justify-center size-14">
                         <svg class="size-6" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -88,16 +88,38 @@ export default {
     },
     data() {
         return {
-            isPlaying: false,
+            isPlaying: (sessionStorage.getItem('audio')) === 'play',
             autoplay: true,
-            sound: null
+            sound: null,
+            audioFile:this.audioSource
         };
+    },
+    watch:{
+        audioSource(newValue,oldValue){
+           if (newValue !== oldValue)
+           {
+               this.sound.pause();
+               this.audioFile = newValue
+               this.init()
+               console.log('called watched')
+               console.log(this.isPlaying,'is playing in watch')
+               console.log(sessionStorage.getItem('audio'),'session value')
+               if (this.isPlaying)
+               {
+                   console.log('watch play called')
+                   this.sound.play()
+               }
+           }
+        }
     },
     methods: {
         togglePlayback() {
+            console.log('playing',this.isPlaying)
             if (this.isPlaying) {
+                sessionStorage.setItem('audio','pause')
                 this.sound.pause();
             } else {
+                sessionStorage.setItem('audio','play')
                 this.sound.play();
             }
             this.isPlaying = !this.isPlaying;
@@ -110,37 +132,41 @@ export default {
         },
         goBack()
         {
-            console.log('back clicked')
-           console.log('hisotory length',window.history.length)
+            this.$router.go({name:'menu'})
+        },
+        init()
+        {
+            // Detect if autoplay is allowed by the browser
+            const audio = new Audio();
+            audio.src = ''; // Create a dummy audio element
+            audio.autoplay = true; // Attempt autoplay
+            audio.play().then(() => {
+                // Autoplay succeeded
+                this.autoplay = true;
+            }).catch(() => {
+                // Autoplay failed, update UI accordingly
+                this.autoplay = false;
+            }).finally(() => {
+                // Clean up dummy audio element
+                audio.remove();
+            });
+
+            // Initialize Howler.js
+            this.sound = new Howl({
+                src: [this.audioFile],
+                autoplay: false,
+                // onplay: () => {
+                //     this.isPlaying = true;
+                // },
+                // onpause: () => {
+                //     console.log('push kore dicche')
+                //     this.isPlaying = false;
+                // }
+            });
         }
     },
     mounted() {
-        // Detect if autoplay is allowed by the browser
-        const audio = new Audio();
-        audio.src = ''; // Create a dummy audio element
-        audio.autoplay = true; // Attempt autoplay
-        audio.play().then(() => {
-            // Autoplay succeeded
-            this.autoplay = true;
-        }).catch(() => {
-            // Autoplay failed, update UI accordingly
-            this.autoplay = false;
-        }).finally(() => {
-            // Clean up dummy audio element
-            audio.remove();
-        });
-
-        // Initialize Howler.js
-        this.sound = new Howl({
-            src: [this.audioSource],
-            autoplay: false,
-            onplay: () => {
-                this.isPlaying = true;
-            },
-            onpause: () => {
-                this.isPlaying = false;
-            }
-        });
+          this.init()
     },
     beforeDestroy() {
         // Cleanup audio when component is destroyed

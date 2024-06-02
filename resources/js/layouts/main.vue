@@ -5,7 +5,7 @@
 
         <slot/>
 
-    <clientFooter :autoplay="true" :audioSource="audioSource"/>
+<!--    <clientFooter :autoplay="true" :audioSource="audioSource"/>-->
 
     </div>
 
