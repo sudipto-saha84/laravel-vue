@@ -1,5 +1,5 @@
 <template>
-    <mainLayout>
+    <mainLayout :autoplay="true" :audioSource="audio">
 
         <div class="fixed top-0 w-screen h-screen flex-row justify-start z-[2147483647]" id="mobileMenu"
              :style="menuShow?'display: flex;':'display: none'">
@@ -315,7 +315,7 @@
             </svg>
         </button>
         <!-- Headphone -->
-        <clientFooter :autoplay="true" :audioSource="audio"/>
+<!--        <clientFooter />-->
     </mainLayout>
 </template>
 
@@ -323,6 +323,8 @@
 import mainLayout from "@/layouts/main.vue";
 import '../script.js'
 import clientFooter from "@/views/includes/footer.vue";
+import {useCounter, useIdle} from "@vueuse/core";
+import {watch} from "vue";
 
 export default {
     name: 'App',
@@ -347,6 +349,20 @@ export default {
     mounted() {
         this.init()
         this.mobileMenuDetails = this.dataDetails
+    },
+    created() {
+        const { inc, count } = useCounter()
+
+        const { idle, lastActive, reset } = useIdle(30 * 1000) // 5 min
+
+        watch(idle, (idleValue) => {
+            if (idleValue) {
+                inc()
+                this.audio = ''
+                this.$router.push({name:'home'})
+                reset() // restarts the idle timer. Does not change lastActive value
+            }
+        })
     },
     methods:{
         openNav(){

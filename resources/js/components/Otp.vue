@@ -20,18 +20,14 @@
     <main class="">
         <div class="container">
 
-            <h1 class="text-blue font-bold text-2xl leading-7 lg:text-4xl lg:leading-10 uppercase text-center mb-10">Welcome to prime bank<br/> Visual IVR Service</h1>
 
             <form class="max-w-sm mx-auto">
                 <div class="mb-5">
-                    <label for="mNumber" class="block mb-2 text-lg text-black text-center">Enter Your Phone Number</label>
-                    <input type="text" id="mNumber" v-model="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Phone Number..." required />
-                </div>
-                <div class="mb-5 flex justify-center">
-                    <p>Robot</p>
+                    <label for="mNumber" class="block mb-2 text-lg text-black text-center">Enter Otp Number</label>
+                    <input type="text" v-model="otp" id="mNumber" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" maxlength="4" placeholder="Otp..." required />
                 </div>
                 <div class="text-center">
-                    <button type="submit" @click.prevent="submitLoader" class="text-white bg-blue hover:bg-blue/85 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm lg:text-lg w-auto px-10 py-2.5 text-center">Submit</button>
+                    <button type="submit" @click.prevent="submitOtp" class="text-white bg-blue hover:bg-blue/85 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm lg:text-lg w-auto px-10 py-2.5 text-center">Submit</button>
                 </div>
             </form>
 
@@ -42,56 +38,70 @@
 
 <script>
 import clientHeader from '../views/includes/header.vue'
+// import {useToast} from 'vue-toast-notification';
+// import 'vue-toast-notification/dist/theme-sugar.css';
 import router from "@/router/index.js";
 
 
-
 export default {
-    name: 'Home',
+    name: 'Otp',
     components: {
         clientHeader
     },
-
-
     data() {
         return {
             isActive: false,
             activeComponents : '',
             loader:false,
-            number:'',
-            sendOtpUrl : '/api/send-otp',
-
+            otp:'',
+            verifyOtpUrl: '/api/verify-otp',
+            number: sessionStorage.getItem('number'),
+            verifyOtpData:{}
         }
     },
-
     methods:{
         submit()
         {
             this.loader = false
-            this.$router.push({name:'otp'})
+            this.$router.push({name:'authSuccess'})
         },
-        submitLoader()
+       async submitOtp()
         {
-            // this.loader = true
-            if (this.number.length !== 11)
+            if (this.otp.length !== 4)
             {
                 this.$toast.open({
-                    message: 'Number Must Be 11 Digits',
+                    message: 'Otp Must Be 4 Digit',
                     type: 'error',
                     position: 'top-right'
                 });
-            }else {
-                sessionStorage.setItem('number',this.number)
+            }else
+            {
                 this.loader = true
-                this.sendOtp()
-                setTimeout(this.submit, 2000)
+                await this.verifyOtp().then(response => {
+                    this.verifyOtpData = response.data
+
+                })
+                this.loader = false
+                if (this.verifyOtpData.code !== 200)
+                {
+                    this.$toast.open({
+                        message: 'Invalid Otp Please Try With Correct Otp',
+                        type: 'error',
+                        position: 'top-right'
+                    });
+                }else
+                {
+                    sessionStorage.setItem('token',this.verifyOtpData.token)
+                    sessionStorage.setItem('time',this.verifyOtpData.time)
+                    this.submit()
+                }
             }
         },
-        sendOtp()
+        verifyOtp()
         {
             return new Promise((resolve, reject) => {
                 axios
-                    .post(this.sendOtpUrl, {number:this.number})
+                    .post(this.verifyOtpUrl, {otp:this.otp,number:this.number})
                     .then((response) => {
                         resolve(response)
                     })

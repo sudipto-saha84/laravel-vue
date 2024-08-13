@@ -10,6 +10,11 @@ const router = createRouter({
             component:()=>import('../components/Home.vue')
         },
         {
+            path:'/otp',
+            name:'otp',
+            component:()=>import('../components/Otp.vue')
+        },
+        {
             path:'/auth-success',
             name:'authSuccess',
             component:()=>import('../components/HomeSuccess.vue'),

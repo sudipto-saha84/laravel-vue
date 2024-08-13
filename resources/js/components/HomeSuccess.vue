@@ -40,13 +40,37 @@ export default {
     data() {
         return {
             isActive: false,
-            activeComponents : ''
+            activeComponents : '',
+            verifyTokenUrl : '/api/verify-token',
+            token:sessionStorage.getItem('token'),
+            number:sessionStorage.getItem('number'),
+            time:sessionStorage.getItem('time'),
+            verifyTokenData:{}
         }
     },
     methods:{
-        submit()
+        async submit()
         {
-            this.$router.push({name:'menu'})
+            await this.verifyToken().then(response => {
+                this.verifyTokenData = response.data
+
+            })
+            //this.$router.push({name:'menu'})
+        },
+        verifyToken()
+        {
+            return new Promise((resolve, reject) => {
+                axios
+                    .post(this.verifyTokenUrl, {token:this.token,time:this.time,number:this.number})
+                    .then((response) => {
+                        resolve(response)
+                    })
+                    .catch((error) => {
+                        reject(error)
+                    })
+                    .finally(() => {
+                    })
+            })
         }
     }
 }
